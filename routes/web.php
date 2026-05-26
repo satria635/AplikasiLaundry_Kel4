@@ -19,12 +19,13 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // 1. Dashboard bawaan Breeze (Biarkan asli tanpa diubah sesuai keinginanmu)
+    
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-
-    // 2. Halaman Pesanan Khusus yang dikendalikan oleh PesananController
+    
+    Route::get('/pesanan/create', [PesananController::class, 'create'])->name('pesanan.create');
+    
     Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
     Route::post('/pesanan', [PesananController::class, 'store'])->name('pesanan.store');
     Route::delete('/pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.destroy');

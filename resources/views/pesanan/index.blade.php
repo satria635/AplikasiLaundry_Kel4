@@ -42,9 +42,51 @@
                     <button class="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
                         <i class="fa-solid fa-file-export mr-2"></i> Export CSV
                     </button>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
-                        + Pesanan Baru
-                    </button>
+                <div x-data="{ open: false }">
+                <button @click="open = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                    + Pesanan Baru
+                </button>
+
+                <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+                    <div @click.away="open = false" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg">
+                        <h2 class="text-xl font-bold mb-4">Tambah Pesanan Baru</h2>
+                        
+                        <form action="{{ route('pesanan.store') }}" method="POST">
+                        @csrf
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Nama Pelanggan</label>
+                                <input type="text" name="pelanggan" class="w-full border-gray-300 rounded-lg mt-1" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Nomor HP</label>
+                                <input type="text" name="nomor_hp" class="w-full border-gray-300 rounded-lg mt-1" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Layanan</label>
+                                <input type="text" name="layanan" class="w-full border-gray-300 rounded-lg mt-1" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Status</label>
+                                <input type="text" name="status" class="w-full border-gray-300 rounded-lg mt-1" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Pembayaran</label>
+                                <input type="text" name="pembayaran" class="w-full border-gray-300 rounded-lg mt-1" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total Harga</label>
+                                <input type="number" name="total" class="w-full border-gray-300 rounded-lg mt-1" required>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2 mt-6">
+                            <button type="button" @click="open = false" class="px-4 py-2 border rounded-lg hover:bg-gray-100">Batal</button>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Simpan</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
                 </div>
             </div>
 
@@ -63,15 +105,24 @@
                     </thead>
                     <tbody class="divide-y">
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 font-bold text-blue-600">#ORD-000024</td>
-                            <td class="px-6 py-4">Bagas <br> <span class="text-xs text-gray-400">082266776212</span></td>
+                            <td class="px-6 py-4 font-bold text-blue-600">#ORD-000001</td>
+                            <td class="px-6 py-4">Satria <br> <span class="text-xs text-gray-400">082266776212</span></td>
                             <td class="px-6 py-4">Cuci Kilat <br> <span class="text-xs text-gray-400">pcs</span></td>
                             <td class="px-6 py-4"><span class="text-blue-500">● Baru</span></td>
                             <td class="px-6 py-4 text-green-500"><i class="fa-solid fa-check-circle"></i> Lunas</td>
                             <td class="px-6 py-4 font-semibold">Rp 22.470</td>
                             <td class="px-6 py-4">
-                                <button class="bg-blue-600 text-white px-3 py-1 rounded-md text-xs">Konfirmasi</button>
-                                <button class="bg-green-600 text-white px-3 py-1 rounded-md text-xs ml-2">Whatsapp</button>
+                                <div class="flex items-center gap-2">
+                                    <button title="Konfirmasi" class="bg-blue-600 text-white p-2 rounded-md text-xs hover:bg-blue-700">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button title="Whatsapp" class="bg-green-600 text-white p-2 rounded-md text-xs hover:bg-green-700">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </button>
+                                    <button title="Hapus" class="bg-red-600 text-white p-2 rounded-md text-xs hover:bg-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

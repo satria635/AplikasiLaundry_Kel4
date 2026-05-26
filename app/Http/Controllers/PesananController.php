@@ -36,4 +36,5 @@ class PesananController extends Controller
 
         return redirect()->route('pesanan.index')->with('success', 'Pesanan berhasil dihapus!');
     }
+
 }
