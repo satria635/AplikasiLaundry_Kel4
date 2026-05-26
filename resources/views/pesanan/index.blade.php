@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">Pesanan</h2>
             </div>
@@ -42,7 +42,25 @@
                     <button class="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
                         <i class="fa-solid fa-file-export mr-2"></i> Export CSV
                     </button>
-                <div x-data="{ open: false }">
+                <div x-data="{
+                    open: false,
+                    layanan: 'Cuci Kiloan',
+                    harga: 25000,
+                    status: 'Baru',
+                    pembayaran: 'Tunai',
+                    layananOptions: [
+                        { label: 'Cuci Kiloan', value: 'Cuci Kiloan', price: 25000 },
+                        { label: 'Cuci Express', value: 'Cuci Express', price: 40000 },
+                        { label: 'Setrika', value: 'Setrika', price: 15000 },
+                        { label: 'Cuci + Setrika', value: 'Cuci + Setrika', price: 50000 }
+                    ],
+                    statusOptions: ['Baru', 'Sedang Diproses', 'Siap Diambil', 'Selesai'],
+                    pembayaranOptions: ['Tunai', 'Debit', 'Transfer', 'QRIS'],
+                    updateTotal() {
+                        const selected = this.layananOptions.find(item => item.value === this.layanan);
+                        this.harga = selected ? selected.price : 0;
+                    }
+                }">
                 <button @click="open = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
                     + Pesanan Baru
                 </button>
@@ -50,7 +68,7 @@
                 <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
                     <div @click.away="open = false" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg">
                         <h2 class="text-xl font-bold mb-4">Tambah Pesanan Baru</h2>
-                        
+
                         <form action="{{ route('pesanan.store') }}" method="POST">
                         @csrf
                         <div class="space-y-4">
@@ -64,19 +82,31 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Layanan</label>
-                                <input type="text" name="layanan" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                <select name="layanan" x-model="layanan" @change="updateTotal()" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                    <template x-for="item in layananOptions" :key="item.value">
+                                        <option :value="item.value" x-text="item.label"></option>
+                                    </template>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Status</label>
-                                <input type="text" name="status" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                <select name="status" x-model="status" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                    <template x-for="option in statusOptions" :key="option">
+                                        <option :value="option" x-text="option"></option>
+                                    </template>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Pembayaran</label>
-                                <input type="text" name="pembayaran" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                <select name="pembayaran" x-model="pembayaran" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                    <template x-for="option in pembayaranOptions" :key="option">
+                                        <option :value="option" x-text="option"></option>
+                                    </template>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Total Harga</label>
-                                <input type="number" name="total" class="w-full border-gray-300 rounded-lg mt-1" required>
+                                <input type="number" name="total" x-model="harga" class="w-full border-gray-300 rounded-lg mt-1 bg-gray-50" readonly>
                             </div>
                         </div>
                         <div class="flex justify-end gap-2 mt-6">
@@ -104,13 +134,28 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y">
+                        @forelse($pesanans as $pesanan)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 font-bold text-blue-600">#ORD-000001</td>
-                            <td class="px-6 py-4">Satria <br> <span class="text-xs text-gray-400">082266776212</span></td>
-                            <td class="px-6 py-4">Cuci Kilat <br> <span class="text-xs text-gray-400">pcs</span></td>
-                            <td class="px-6 py-4"><span class="text-blue-500">● Baru</span></td>
-                            <td class="px-6 py-4 text-green-500"><i class="fa-solid fa-check-circle"></i> Lunas</td>
-                            <td class="px-6 py-4 font-semibold">Rp 22.470</td>
+                            <td class="px-6 py-4 font-bold text-blue-600">#{{ $pesanan->id }}</td>
+                            <td class="px-6 py-4">{{ $pesanan->pelanggan }} <br> <span class="text-xs text-gray-400">{{ $pesanan->nomor_hp }}</span></td>
+                            <td class="px-6 py-4">{{ $pesanan->layanan }}</td>
+                            <td class="px-6 py-4">
+                                @php
+                                    $s = strtolower(trim($pesanan->status ?? ''));
+                                    if ($s === 'baru') {
+                                        $statusClass = 'text-blue-500';
+                                    } elseif (str_contains($s, 'sedang') || $s === 'sedang proses' || $s === 'sedang diproses') {
+                                        $statusClass = 'text-yellow-500';
+                                    } elseif ($s === 'siap ambil' || $s === 'siap diambil' || $s === 'selesai') {
+                                        $statusClass = 'text-green-500';
+                                    } else {
+                                        $statusClass = 'text-gray-500';
+                                    }
+                                @endphp
+                                <span class="{{ $statusClass }}">● {{ $pesanan->status }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-green-500"><i class="fa-solid fa-check-circle"></i> {{ $pesanan->pembayaran }}</td>
+                            <td class="px-6 py-4 font-semibold">Rp {{ number_format($pesanan->total, 0, ',', '.') }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     <button title="Konfirmasi" class="bg-blue-600 text-white p-2 rounded-md text-xs hover:bg-blue-700">
@@ -125,6 +170,11 @@
                                 </div>
                             </td>
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">Tidak ada pesanan.</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
